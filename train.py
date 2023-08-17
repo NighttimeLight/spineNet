@@ -54,14 +54,22 @@ if __name__ == '__main__':
     model = UNet(n_channels=1, n_classes=1)
     model.to(device=device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    prev_epoch = 0
+    total_epochs = EPOCHS
+
+    # checkpoint = torch.load("./unet_model.pth")
+    # model.load_state_dict(checkpoint['model_state_dict'])
+    # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    # prev_epoch = checkpoint['epoch']
+    # total_epochs = prev_epoch + EPOCHS
 
     train_loss = []
     val_loss = []
-    for epoch in range(EPOCHS):
+    for epoch in range(prev_epoch, total_epochs):
         model.train()
         train_running_loss = 0.0
         counter = 0
-        with tqdm(total=len(train_dataset), desc=f'Epoch {epoch + 1}/{EPOCHS}', unit='img') as pbar:
+        with tqdm(total=len(train_dataset), desc=f'Epoch {epoch + 1}/{total_epochs}', unit='img') as tpbar:
             for batch in train_dataloader:
                 counter += 1
                 image = batch['image'].to(DEVICE)
@@ -73,27 +81,32 @@ if __name__ == '__main__':
                 train_running_loss += loss.item()
                 loss.backward()
                 optimizer.step()
-                pbar.update(image.shape[0])
-                pbar.set_postfix(**{'loss (batch)': loss.item()})
+                tpbar.update(image.shape[0])
+                tpbar.set_postfix(**{'loss (batch)': loss.item()})
             train_loss.append(train_running_loss / counter)
+            print("Train_loss: {0}".format(train_running_loss / counter))
 
         model.eval()
         valid_running_loss = 0.0
         counter = 0
         with torch.no_grad():
-            for i, data in enumerate(valid_dataloader):
-                counter += 1
-                image = data['image'].to(DEVICE)
-                mask = data['mask'].to(DEVICE)
-                outputs = model(image)
-                outputs = outputs.squeeze(1)
-                loss = DiceLoss()(outputs, mask)
-                valid_running_loss += loss.item()
-            val_loss.append(valid_running_loss)
+            with tqdm(total=len(valid_dataset), desc=f'Val Epoch {epoch + 1}/{total_epochs}', unit='img') as vpbar:
+                for batch in valid_dataloader:
+                    counter += 1
+                    image = batch['image'].to(DEVICE)
+                    mask = batch['mask'].to(DEVICE)
+                    outputs = model(image)
+                    outputs = outputs.squeeze(1)
+                    loss = DiceLoss()(outputs, mask)
+                    valid_running_loss += loss.item()
+                    vpbar.update(image.shape[0])
+                    vpbar.set_postfix(**{'loss (batch)': loss.item()})
+                train_loss.append(valid_running_loss / counter)
+                print("Val_loss: {0}".format(valid_running_loss / counter))
 
         # Save the trained model
         torch.save({
-            'epoch': EPOCHS,
+            'epoch': epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
         }, "./unet_model.pth")
