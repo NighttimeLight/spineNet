@@ -91,6 +91,9 @@ def generate_data(raw_file, label_file, file_name, output_raw_file_path, output_
     # If skip every 2 slice. Adjacent slices can be very similar to each other and
     # will generate redundant data
     skip_slice = 3
+    center_slice = 1
+    center_rel_slice = 0.2
+    method = 'center'
     continue_it = True
     raw_data = read_file(raw_file)
     label_data = read_file(label_file)
@@ -118,14 +121,35 @@ def generate_data(raw_file, label_file, file_name, output_raw_file_path, output_
             slice_count = transposed_raw_data.shape[-1]
             # print("File name: ", file_name, " - Slice count: ", slice_count)
 
-            # skip some slices
-            for each_slice in range(1, slice_count, skip_slice):
-                save_file(transposed_raw_data[:, :, each_slice],
-                          transposed_label_data[:, :, each_slice],
-                          file_name,
-                          each_slice,
-                          output_raw_file_path,
-                          output_label_file_path)
+            if method == 'every':
+                for each_slice in range(1, slice_count, skip_slice):
+                    save_file(transposed_raw_data[:, :, each_slice],
+                              transposed_label_data[:, :, each_slice],
+                              file_name,
+                              each_slice,
+                              output_raw_file_path,
+                              output_label_file_path)
+            elif method == 'center':
+                middle = slice_count // 2
+                for each_slice in range(middle - center_slice // 2, middle + (center_slice // 2) + 1):
+                    if each_slice in range(1, slice_count):
+                        save_file(transposed_raw_data[:, :, each_slice],
+                                  transposed_label_data[:, :, each_slice],
+                                  file_name,
+                                  each_slice,
+                                  output_raw_file_path,
+                                  output_label_file_path)
+            elif method == 'center_rel':
+                center_slice = int(slice_count * center_rel_slice)
+                middle = slice_count // 2
+                for each_slice in range(middle - center_slice // 2, middle + (center_slice // 2) + 1):
+                    if each_slice in range(1, slice_count):
+                        save_file(transposed_raw_data[:, :, each_slice],
+                                  transposed_label_data[:, :, each_slice],
+                                  file_name,
+                                  each_slice,
+                                  output_raw_file_path,
+                                  output_label_file_path)
 
 
 def generate_png(raw_file, file_name, output_raw_file_path):
