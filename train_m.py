@@ -61,11 +61,11 @@ if __name__ == '__main__':
     model_s = UNet(n_channels=1, n_classes=2)
     model_s.to(device=device)
     # Load trained single label model
-    checkpoint_s = torch.load("./unet_model_s.pth")
+    checkpoint_s = torch.load("models/unet_model_s.pth")
     model_s.load_state_dict(checkpoint_s['model_state_dict'])
 
     # # Load recent train progress
-    # checkpoint = torch.load("./unet_model_m_prev.pth")
+    # checkpoint = torch.load("models/unet_model_m_prev.pth")
     # model_m.load_state_dict(checkpoint['model_state_dict'])
     # optimizer_m.load_state_dict(checkpoint['optimizer_state_dict'])
     # prev_epoch = checkpoint['epoch'] + 1
@@ -142,7 +142,7 @@ if __name__ == '__main__':
             'epoch': epoch,
             'model_state_dict': model_m.state_dict(),
             'optimizer_state_dict': optimizer_m.state_dict(),
-        }, "./unet_model_m.pth")
+        }, "models/unet_model_m.pth")
 
     train_losses_f.close()
     val_losses_f.close()

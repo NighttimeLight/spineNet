@@ -56,7 +56,7 @@ if __name__ == '__main__':
     total_epochs = EPOCHS
 
     # Load recent train progress
-    # checkpoint = torch.load("./unet_model_s_prev.pth")
+    # checkpoint = torch.load("models/unet_model_s_prev.pth")
     # model.load_state_dict(checkpoint['model_state_dict'])
     # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     # prev_epoch = checkpoint['epoch'] + 1
@@ -109,4 +109,4 @@ if __name__ == '__main__':
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-        }, "./unet_model_s.pth")
+        }, "models/unet_model_s.pth")
