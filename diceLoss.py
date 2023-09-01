@@ -8,6 +8,7 @@ class DiceLoss(nn.Module):
         super(DiceLoss, self).__init__()
 
     def forward(self, inputs, targets, smooth=1):
+        # normalization to [0,1]
         inputs = torch.sigmoid(inputs)
 
         # flatten label and prediction tensors
@@ -17,9 +18,9 @@ class DiceLoss(nn.Module):
         intersection = (inputs * targets).sum()
         dice = (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
 
-        bce = F.binary_cross_entropy_with_logits(inputs, targets)
-        pred = torch.sigmoid(inputs)
-        loss = bce * 0.5 + dice * (1 - 0.5)
+        # bce = F.binary_cross_entropy_with_logits(inputs, targets)
+        # pred = torch.sigmoid(inputs)
+        # loss = bce * 0.5 + dice * (1 - 0.5)
 
         # subtract 1 to calculate loss from dice value
         return 1 - dice
