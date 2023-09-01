@@ -32,15 +32,14 @@ class Dataset(Dataset):
         # resize image and change the shape to (1, image_width, image_height)
         w, h = image.size
         image = image.resize((w, h), resample=Image.BICUBIC)
-        image = T.Resize(size=(IMAGE_WIDTH, IMAGE_HEIGHT))(image)
+        image = T.Resize(size=(IMAGE_WIDTH, IMAGE_HEIGHT), interpolation=Image.BICUBIC)(image)
         image_ndarray = np.array(image)
         image_ndarray = image_ndarray.reshape(1, image_ndarray.shape[0], image_ndarray.shape[1])
 
         # resize the mask. Mask shape is (image_width, image_height)
         mask = mask.resize((w, h), resample=Image.NEAREST)
-        mask = T.Resize(size=(IMAGE_WIDTH, IMAGE_HEIGHT))(mask)
+        mask = T.Resize(size=(IMAGE_WIDTH, IMAGE_HEIGHT), interpolation=Image.NEAREST)(mask)
         mask_ndarray = np.array(mask)
-        image_ndarray[0] = np.where(mask_ndarray == 0, 0, image_ndarray[0])
         return {
             'image': torch.as_tensor(image_ndarray.copy()).float().contiguous(),
             'mask': torch.as_tensor(mask_ndarray.copy()).float()
